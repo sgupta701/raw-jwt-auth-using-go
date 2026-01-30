@@ -8,7 +8,7 @@ a bare-metal implementation of JWT authentication to understand the internal mec
 - manual HTTP header parsing
 - refresh tokens
 
-secret key is currently hardcoded.. in a production environment, this would be moved to an .env file.
+secret key is currently hardcoded.. in a production environment, this would be moved to an .env file. 
 
 **start the server**
     go run main.go
