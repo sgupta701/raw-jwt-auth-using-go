@@ -8,9 +8,15 @@ import(
 
 	"fmt" //for writiing text to response writer w
 	"strings" // when the client sends the token, they send it as Bearer eyJhbG.... this library cuts off the "Bearer " so we have the raw token
+
+	"crypto/rand" //generate random numbers
+	"encoding/base64" // turn them into strings
 )
 
 var seckey = []byte("my_secret_key")  // coz jwt expects bytes
+
+// i am creating a dummy db with key(RT string) and value (username)
+var RefreshToken = map[string]string{} // to store refresh tokens against usernames
 
 type Credentials struct{
 	Username string `json:"username"` // captialized to be exported(Public), so that json package can access it
@@ -35,6 +41,7 @@ func Login(w http.ResponseWriter, r *http.Request){
 	// r.Body is raw stream of bytes form user..
     // Decode(&creds) reads that stream and fills our variable.
 
+
 	// 3. set the exp time
 	expirationtime := time.Now().Add(10* time.Minute)
 
@@ -53,13 +60,24 @@ func Login(w http.ResponseWriter, r *http.Request){
 	// 6 sign token with secret key
 	tokenString, _ := token.SignedString(seckey) // takes the haeder and payload, signs it with secret key and returns the complete token
 
-	// 7. set the content type
+	// 7 refresh token generation
+
+	randomBytes := make([]byte, 32) // list of 32 empty bytes
+	rand.Read(randomBytes) // fill it with random bytes
+
+	refreshTokenString := base64.URLEncoding.EncodeToString(randomBytes) // turn random bytes into string
+
+	// 8 store the refresh token against the username in our dummy db
+	RefreshToken[refreshTokenString] = creds.Username
+
+	// 9. set the content type
 
 	w.Header().Set("Content-Type", "application/json")
 
-	// 9. send the token back as response
+	// 10. send the token back as response
 	json.NewEncoder(w).Encode(map[string]string{
-		"token": tokenString,
+		"access_token": tokenString,
+		"refresh_token": refreshTokenString,
 	})
 }
 
