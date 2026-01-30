@@ -87,7 +87,7 @@ func Login(w http.ResponseWriter, r *http.Request){
 }
 
 func Home(w http.ResponseWriter, r *http.Request){
-	fmt.Fprintf(w, "token valid!")
+	fmt.Fprintf(w, "access token valid!")
 }
 
 func IsAuthorized(next http.HandlerFunc) http.HandlerFunc{  // it is s higher order function that takes another function as input.. input 'next' the function we want to protect
@@ -142,10 +142,11 @@ func Refresh(w http.ResponseWriter, r *http.Request) {
         return
     }
 
-    // 3. create a access token)
+    // 3. create a access token
 
     // exact same logic as login as odne earlier...
     expirationTime := time.Now().Add(5 * time.Minute)
+
     claims := &Claims{
         Username: username, // use the username we found in the map
         RegisteredClaims: jwt.RegisteredClaims{
