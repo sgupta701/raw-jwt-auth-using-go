@@ -29,6 +29,11 @@ type Claims struct {
     jwt.RegisteredClaims
 }
 
+// cntainer for the refresh request
+type RefreshRequest struct {
+    RefreshToken string `json:"refresh_token"`
+}
+
 func Login(w http.ResponseWriter, r *http.Request){
 	// anything you write to w gets sent back to the user as response
 	// * is a pointer to request struct... anything you read from r is what the user sent to you in the request
@@ -43,7 +48,7 @@ func Login(w http.ResponseWriter, r *http.Request){
 
 
 	// 3. set the exp time
-	expirationtime := time.Now().Add(10* time.Minute)
+	expirationtime := time.Now().Add(1* time.Minute) // reducing from 10 to 1 min for testing
 
 	// 4 create the claims (payload)
 	claims := &Claims{
@@ -116,9 +121,52 @@ func IsAuthorized(next http.HandlerFunc) http.HandlerFunc{  // it is s higher or
 	}
 }
 
+func Refresh(w http.ResponseWriter, r *http.Request) {
+    
+	// 1 decode the json to get the token string
+    var req RefreshRequest
+    err := json.NewDecoder(r.Body).Decode(&req)
+    if err != nil {
+        w.WriteHeader(http.StatusBadRequest)
+        return
+    }
+
+    // 2.check the db
+    // Syntax: value, exists := map[key]
+
+    username, ok := RefreshToken[req.RefreshToken]
+
+    if !ok {        // if the token is in the map, ok is true, and 'username' is "admin".. and if not, ok is false.
+        w.WriteHeader(http.StatusUnauthorized)
+        fmt.Fprint(w, "Invalid Refresh Token")
+        return
+    }
+
+    // 3. create a access token)
+
+    // exact same logic as login as odne earlier...
+    expirationTime := time.Now().Add(5 * time.Minute)
+    claims := &Claims{
+        Username: username, // use the username we found in the map
+        RegisteredClaims: jwt.RegisteredClaims{
+            ExpiresAt: jwt.NewNumericDate(expirationTime),
+        },
+    }
+
+    token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+    tokenString, _ := token.SignedString(seckey)
+
+    // 4. send the new jwt back
+    w.Header().Set("Content-Type", "application/json")
+    json.NewEncoder(w).Encode(map[string]string{
+        "access_token": tokenString,
+    })
+}
+
 func main(){
 	http.HandleFunc("/login", Login) 
 	http.HandleFunc("/home", IsAuthorized(Home)) //  /home endpoint hit; call IsAuthorized(Home) func
+	http.HandleFunc("/refresh", Refresh) // refresh route
 	fmt.Println("server started at :8000")
 	http.ListenAndServe(":8000", nil)
 }
