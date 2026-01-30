@@ -7,7 +7,7 @@ import(
     "github.com/golang-jwt/jwt/v5"
 )
 
-var seckey = []byte("my_secret_key")  //type conversion coz JWT expects bytes
+var seckey = []byte("my_secret_key")  //done coz jwt expect bytes
 
 type Credentials struct{
     Username string `json:"username"` // captialized to be exported(Public), so that json package can access it
