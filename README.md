@@ -6,7 +6,7 @@ a simple implementation of JWT authentication to understand the internal mechani
 - token issuance
 - middleware verification patterns
 - manual HTTP header parsing
-- refresh tokens
+- refresh tokens 
 
 secret key is currently hardcoded.. in a production environment, this would be moved to an .env file. 
 
