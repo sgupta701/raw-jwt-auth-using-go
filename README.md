@@ -3,7 +3,7 @@ creation of token, addition of middleware and reissuuing of access token using r
 
 a simple implementation of JWT authentication to understand the internal mechanics of:
 
-- token issuance
+- token issuance 
 - middleware verification patterns
 - manual HTTP header parsing
 - refresh tokens 
