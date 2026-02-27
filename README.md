@@ -11,7 +11,7 @@ a simple implementation of JWT authentication to understand the internal mechani
 secret key is currently hardcoded.. in a production environment, this would be moved to an .env file. 
 
 **start the server**
-    go run main.go 
+    go run main.go
 
 ## API Usage
 
